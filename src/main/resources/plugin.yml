@@ -1,0 +1,13 @@
+name: OreRepository
+version: ${project.version}
+main: com.spinalcraft.orerepository.OreRepository
+api-version: 1.16
+authors: [Belinski20]
+description: A server repository for various items
+
+commands:
+  cr:
+    permission-message: Do not have valid permissions to use
+    description: Carpal Repository is a server repository for various items
+    permission: cr.admin
+    usage: /cr <subcommand>
