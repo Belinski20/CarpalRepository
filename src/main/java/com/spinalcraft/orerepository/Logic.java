@@ -16,7 +16,7 @@ public class Logic {
         // Difference between default amount of item and the current amount
         // If there is more steps should be positive, otherwise should be negative
         // default: 50 current: 25 || 25 - 50 = -25 step: 3 -25 / 3 = -8
-        int steps = (mItem.getAmount() - rItem.getDefaultAmount()) / rItem.getStepSize();
+        int steps = -(mItem.getAmount() - rItem.getDefaultAmount()) / rItem.getStepSize();
 
         // Current price based on default cost and the amount of steps
         float modifiedCost = defaultCost + (rItem.getStepPrice() * steps);
@@ -28,7 +28,7 @@ public class Logic {
                 modifiedCost = rItem.getMaxPrice();
 
         // Apply the sale modifier to the cost
-        return modifiedCost *= rItem.getSaleModifier();
+        return modifiedCost *= ((float)rItem.getSaleModifier() / 100);
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.spinalcraft.orerepository.Commands;
 
 import com.spinalcraft.orerepository.MarketManager;
+import com.spinalcraft.orerepository.Util.Messages;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -38,19 +39,26 @@ public class CarpalCommand implements TabExecutor {
             return true;
         }
         if(args[0].equals("reload"))
-            return reload(sender);
+            if(sender.hasPermission("Cr.reload.admin"))
+                return reload(sender);
         if(args[0].equals("globalcut"))
-            return globalCut(sender, args);
+            if(sender.hasPermission("Cr.globalcut.admin"))
+                return globalCut(sender, args);
         if(args[0].equals("sale"))
-            return sale(sender, args);
+            if(sender.hasPermission("Cr.sale.admin"))
+                return sale(sender, args);
         if(args[0].equals("buy"))
-            return buy(sender, args);
+            if(sender.hasPermission("Cr.buy"))
+                return buy(sender, args);
         if(args[0].equals("sell"))
-            return sell(sender, args);
+            if(sender.hasPermission("Cr.sell"))
+                return sell(sender, args);
         if(args[0].equals("price"))
-            return price(sender, args);
+            if(sender.hasPermission("Cr.price"))
+                return price(sender, args);
         if(args[0].equals("stock"))
-            return stock(sender, args);
+            if(sender.hasPermission("Cr.stock"))
+                return stock(sender, args);
         return false;
     }
 
@@ -68,17 +76,17 @@ public class CarpalCommand implements TabExecutor {
     private boolean reload(CommandSender sender)
     {
         if(sender instanceof Player)
-            sender.sendMessage(reloadMessage);
-        sender.getServer().getConsoleSender().sendMessage(reloadMessage);
+            sender.sendMessage(Messages.reloadMessage);
+        sender.getServer().getConsoleSender().sendMessage(Messages.reloadMessage);
         return manager.reload();
     }
 
     private boolean globalCut(CommandSender sender, String[] args)
     {
         int value = 0;
-        if(args.length < 3)
+        if(args.length < 2)
         {
-            sender.sendMessage(missingValue);
+            sender.sendMessage(Messages.globalCutInvalidParameters);
             return true;
         }
         try
@@ -87,18 +95,44 @@ public class CarpalCommand implements TabExecutor {
         }
         catch(NumberFormatException e)
         {
-            sender.sendMessage(missingValue);
+            sender.sendMessage(Messages.globalCutInvalidValue);
             return true;
         }
         manager.updateGlobalPriceCut(value);
         if(sender instanceof Player)
-            sender.sendMessage(globalPriceCutValid + value);
-        sender.getServer().getConsoleSender().sendMessage(sender.getName() + ": " + globalPriceCutValid + value);
+            sender.sendMessage(Messages.globalPriceCutValid + value);
+        sender.getServer().getConsoleSender().sendMessage(sender.getName() + ": " + Messages.globalPriceCutValid + value);
         return true;
     }
 
     private boolean sale(CommandSender sender, String[] args)
     {
+        int value = 0;
+        if(args.length < 3)
+        {
+            sender.sendMessage(Messages.saleInvalidParameters);
+            return true;
+        }
+        Material material = Material.matchMaterial(args[1]);
+        if(material == null)
+        {
+            sender.sendMessage(Messages.invalidMaterial);
+            return true;
+        }
+        try
+        {
+            value = Integer.parseInt(args[2]);
+        }
+        catch(NumberFormatException e)
+        {
+            sender.sendMessage(Messages.saleInvalidValue);
+            return true;
+        }
+        manager.updateSalePrice(material, value);
+        String message = Messages.salePriceChange.replace("Material", material.name()).replace("Value", String.valueOf(value));
+        if(sender instanceof Player)
+            sender.sendMessage(message);
+        sender.getServer().getConsoleSender().sendMessage(message);
         return true;
     }
 
@@ -106,21 +140,24 @@ public class CarpalCommand implements TabExecutor {
     {
         if(args.length < 4)
         {
-            sender.sendMessage(cantSell);
+            sender.sendMessage(Messages.buyInvalidParameters);
             return true;
         }
+
         Player player = Bukkit.getPlayer(args[1]);
         if(player == null)
         {
-            sender.sendMessage(invalidPlayer);
+            sender.sendMessage(Messages.invalidPlayer);
             return true;
         }
+
         Material material = Material.matchMaterial(args[2]);
         if(material == null)
         {
-            sender.sendMessage(invalidMaterial);
+            sender.sendMessage(Messages.invalidMaterial);
             return true;
         }
+
         int amount = 0;
         try
         {
@@ -128,20 +165,29 @@ public class CarpalCommand implements TabExecutor {
         }
         catch(NumberFormatException e)
         {
-            sender.sendMessage(missingValue);
+            sender.sendMessage(Messages.buyInvalidValue);
+            return true;
+        }
+
+        if(manager.getCurrentStock(material) < amount)
+        {
+            sender.sendMessage(Messages.buyNotEnoughStock);
             return true;
         }
 
         float itemValue = (float)amount * manager.getSellPrice(material);
         if(!manager.hasEnoughCurrency(player, itemValue))
         {
-            sender.sendMessage("You do not have enough money to purchase this item");
+            sender.sendMessage(Messages.notEnoughMoney);
             return true;
         }
         manager.buy(material, amount);
         manager.withdraw(player, itemValue);
         player.getInventory().addItem(new ItemStack(material, amount));
-        sender.sendMessage("You bought " + amount + " " + args[2] + " for " + itemValue + " from the ore repository");
+        String message = Messages.successfulPurchase.replace("Amount", String.valueOf(amount)).replace("Material", material.name()).replace("Value", String.valueOf(itemValue));
+        if(sender instanceof Player)
+            sender.sendMessage(message);
+        sender.getServer().getConsoleSender().sendMessage(message.replace("You", player.getName()));
         return true;
     }
 
@@ -149,21 +195,24 @@ public class CarpalCommand implements TabExecutor {
     {
         if(args.length < 4)
         {
-            sender.sendMessage(cantSell);
+            sender.sendMessage(Messages.sellInvalidParameters);
             return true;
         }
+
         Player player = Bukkit.getPlayer(args[1]);
         if(player == null)
         {
-            sender.sendMessage(invalidPlayer);
+            sender.sendMessage(Messages.invalidPlayer);
             return true;
         }
+
         Material material = Material.matchMaterial(args[2]);
         if(material == null)
         {
-            sender.sendMessage(invalidMaterial);
+            sender.sendMessage(Messages.invalidMaterial);
             return true;
         }
+
         int amount = 0;
         try
         {
@@ -171,46 +220,59 @@ public class CarpalCommand implements TabExecutor {
         }
         catch(NumberFormatException e)
         {
-            sender.sendMessage(missingValue);
+            sender.sendMessage(Messages.sellCutInvalidValue);
             return true;
         }
 
         float itemValue = (float)amount * manager.getSellPrice(material);
         manager.sell(material, amount);
         manager.deposit(player, itemValue);
-        sender.sendMessage("You sold " + amount + " " + args[2] + " for " + itemValue + " to the ore repository");
+        String message = Messages.successfulSell.replace("Amount", String.valueOf(amount)).replace("Material", material.name()).replace("Value", String.valueOf(itemValue));
+        if(sender instanceof Player)
+            sender.sendMessage(message);
+        sender.getServer().getConsoleSender().sendMessage(message.replace("You", player.getName()));
         return true;
     }
 
     private boolean price(CommandSender sender, String[] args)
     {
         if(args.length < 2)
-            return false;
+        {
+            sender.sendMessage(Messages.priceInvalidParameters);
+            return true;
+        }
+
         Material material = Material.matchMaterial(args[1]);
         if(material == null)
         {
-            sender.sendMessage(invalidMaterial);
+            sender.sendMessage(Messages.invalidMaterial);
             return true;
         }
 
         float buyPrice = manager.getBuyPrice(material);
         float sellPrice = manager.getSellPrice(material);
-        sender.sendMessage(material.name() + ": Buy[" + buyPrice + "] Sell[" + sellPrice + "]");
+        String message = Messages.priceBuySell.replace("Material", material.name()).replace("cost", String.valueOf(buyPrice)).replace("value", String.valueOf(sellPrice));
+        sender.sendMessage(message);
         return true;
     }
 
     private boolean stock(CommandSender sender, String[] args)
     {
         if(args.length < 2)
-            return false;
-        Material material = Material.matchMaterial(args[1]);
-        if(material == null)
         {
-            sender.sendMessage(invalidMaterial);
+            sender.sendMessage(Messages.stockInvalidParameters);
             return true;
         }
 
-        sender.sendMessage(material.name() + ": Stock[" + manager.getCurrentStock(material) + "]");
+        Material material = Material.matchMaterial(args[1]);
+        if(material == null)
+        {
+            sender.sendMessage(Messages.invalidMaterial);
+            return true;
+        }
+
+        String message = Messages.stockCheck.replace("Material", material.name()).replace("Amount", String.valueOf(manager.getCurrentStock(material)));
+        sender.sendMessage(message);
         return true;
     }
 }

@@ -4,68 +4,39 @@ import com.spinalcraft.orerepository.Util.ConfigReader;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
+import java.io.IOException;
 import java.util.*;
 
 public class MarketManager {
 
+    private Plugin plugin;
     private Logic logic;
     private Market market;
     private Economy econ;
     private Set<RepositoryItem> repoItems;
     private Map<Material, Material> oreMap;
 
-    private int globalPriceCut = 20;
+    private int globalPriceCut;
 
-    public MarketManager(Economy econ)
-    {
+    public MarketManager(Economy econ, Plugin plugin) throws IOException {
         logic = new Logic();
         market = new Market();
         repoItems = new HashSet<>();
         this.econ = econ;
-        setupExampleItems();
-    }
-
-    public void setupExampleItems()
-    {
-        addRepoItem(Material.IRON_ORE, 64, 10, 2, 90, 5, 1, 5);
-        addRepoItem(Material.GOLD_ORE, 48, 10, 2, 90, 5, 1, 5);
-        addRepoItem(Material.COAL_ORE, 32, 10, 2, 90, 5, 1, 5);
-        addRepoItem(Material.DIAMOND_ORE, 16, 10, 2, 90, 5, 1, 5);
-    }
-
-    public void addRepoItem(Material material, int defaultAmount, int defaultPrice, int minPrice, int maxPrice, int stepPrice, int stepSize, int saleModifier)
-    {
-        RepositoryItem item = new RepositoryItem();
-        item.setMaterial(material);
-        item.setDefaultAmount(defaultAmount);
-        item.setDefaultPrice(defaultPrice);
-        item.setMaxPrice(maxPrice);
-        item.setMinPrice(minPrice);
-        item.setStepPrice(stepPrice);
-        item.setStepSize(stepSize);
-        item.setSaleModifier(saleModifier);
-        repoItems.add(item);
+        this.plugin = plugin;
+        initialize();
     }
 
     /**
      * Initializes all of the market items and related items
      */
-    public void initialize()
-    {
-        market.addMarketItems(ConfigReader.getMarketItems());
-        repoItems.addAll(Arrays.asList(ConfigReader.getRepositoryItems()));
-        oreMap = ConfigReader.getOreMap();
-        globalPriceCut = ConfigReader.getGlobalPriceCut();
-    }
-
-    /**
-     * Gets the economy on the server
-     * @return
-     */
-    public Economy getEcon()
-    {
-        return econ;
+    public void initialize() throws IOException {
+        market.addMarketItems(ConfigReader.getMarketItems(plugin));
+        repoItems.addAll(Arrays.asList(ConfigReader.getRepositoryItems(plugin)));
+        oreMap = ConfigReader.getOreMap(plugin);
+        globalPriceCut = ConfigReader.getGlobalPriceCut(plugin);
     }
 
     /**
@@ -73,7 +44,11 @@ public class MarketManager {
      */
     public void save()
     {
-        ConfigReader.save(market);
+        try {
+            ConfigReader.save(market, repoItems, plugin);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -82,6 +57,17 @@ public class MarketManager {
      */
     public boolean reload()
     {
+        market.removeMarket();
+        repoItems.clear();
+        oreMap.clear();
+        try
+        {
+            initialize();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
         return true;
     }
 
@@ -169,6 +155,16 @@ public class MarketManager {
     }
 
     /**
+     * Updates the sale modifier of a given item
+     * @param material
+     * @param saleModifier
+     */
+    public void updateSalePrice(Material material, int saleModifier)
+    {
+        getRepositoryItem(material).setSaleModifier(saleModifier);
+    }
+
+    /**
      * Gets the current stock of the item
      * @param material
      * @return
@@ -189,11 +185,21 @@ public class MarketManager {
         return econ.getBalance(player) > cost;
     }
 
+    /**
+     * Withdraws a specific amount of money from a player
+     * @param player
+     * @param cost
+     */
     public void withdraw(Player player, float cost)
     {
         econ.withdrawPlayer(player, cost);
     }
 
+    /**
+     * Deposits a specific amount of money to a player
+     * @param player
+     * @param cost
+     */
     public void deposit(Player player, float cost)
     {
         econ.depositPlayer(player, cost);

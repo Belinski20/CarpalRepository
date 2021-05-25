@@ -11,15 +11,6 @@ public class Market {
     public Market()
     {
         marketItems = new HashSet<>();
-        setupExampleItems();
-    }
-
-    public void setupExampleItems()
-    {
-        addMarketItem(64, Material.IRON_ORE);
-        addMarketItem(64, Material.GOLD_ORE);
-        addMarketItem(64, Material.COAL_ORE);
-        addMarketItem(64, Material.DIAMOND_ORE);
     }
 
     /**
@@ -104,16 +95,6 @@ public class Market {
     }
 
     /**
-     * Checks if the item is in the market
-     * @param material
-     * @return If the item is in the market
-     */
-    public boolean containsMaterial(Material material)
-    {
-        return marketItems.contains(material);
-    }
-
-    /**
      * Get all items from the market
      * Used to backup and save item information
      * @return The set of all market items
@@ -150,6 +131,14 @@ public class Market {
                 return item;
         }
         return null;
+    }
+
+    /**
+     * Removes all items from the market
+     */
+    public void removeMarket()
+    {
+        marketItems.clear();
     }
 
 }
