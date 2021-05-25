@@ -10,7 +10,7 @@ This needs additional plugins to assist in the removing of items/verifying item 
 
 
 # **Server**
-This plugin was developed primary for the Spinalcraft server
+This plugin was developed primarily for the Spinalcraft server
 
 # **permissions**
 *reload* - Cr.reload.admin <br />
