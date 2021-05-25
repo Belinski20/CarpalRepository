@@ -10,5 +10,4 @@ commands:
   cr:
     permission-message: Do not have valid permissions to use
     description: Carpal Repository is a server repository for various items
-    permission: cr.admin
     usage: /cr <subcommand>
