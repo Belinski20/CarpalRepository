@@ -43,7 +43,7 @@ public class Logic {
         // Get the current buy price
         float value = getCurrentBuyPrice(mItem, rItem);
 
-        return value *= globalPriceCut;
+        return value *= ((float) globalPriceCut / 100);
     }
 
 

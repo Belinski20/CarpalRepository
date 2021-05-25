@@ -36,11 +36,19 @@ public class ConfigReader {
         return null;
     }
 
+    /**
+     *
+     * @return
+     */
     public static int getGlobalPriceCut()
     {
         return 0;
     }
 
+    /**
+     *
+     * @param market
+     */
     public static void save(Market market)
     {
 

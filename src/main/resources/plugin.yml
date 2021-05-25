@@ -1,9 +1,10 @@
-name: OreRepository
+name: CarpalRepository
 version: ${project.version}
 main: com.spinalcraft.orerepository.OreRepository
 api-version: 1.16
 authors: [Belinski20]
 description: A server repository for various items
+depend: [Vault]
 
 commands:
   cr:

@@ -11,6 +11,15 @@ public class Market {
     public Market()
     {
         marketItems = new HashSet<>();
+        setupExampleItems();
+    }
+
+    public void setupExampleItems()
+    {
+        addMarketItem(64, Material.IRON_ORE);
+        addMarketItem(64, Material.GOLD_ORE);
+        addMarketItem(64, Material.COAL_ORE);
+        addMarketItem(64, Material.DIAMOND_ORE);
     }
 
     /**
