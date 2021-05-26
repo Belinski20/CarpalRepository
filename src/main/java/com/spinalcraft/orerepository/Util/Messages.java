@@ -7,7 +7,7 @@ public class Messages {
     public static String globalCutInvalidParameters = "Usage - /cr globalcut <value>";
     public static String globalCutInvalidValue = "The value used for the global cut is not a valid number";
     public static String saleInvalidParameters = "Usage - /cr sale <item material> <value>";
-    public static String invalidMaterial = "The given material type is not a valid material type";
+    public static String invalidMaterial = "The given material type is not a valid material type or has no reference material";
     public static String saleInvalidValue = "The value used for the sale is not a valid number";
     public static String salePriceChange = "Sale for Material updated to Value % off";
     public static String buyInvalidParameters = "Usage - /cr buy <user> <item material> <amount>";

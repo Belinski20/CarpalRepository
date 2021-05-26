@@ -3,7 +3,6 @@ package com.spinalcraft.orerepository.Commands;
 import com.spinalcraft.orerepository.MarketManager;
 import com.spinalcraft.orerepository.Util.Messages;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -19,13 +18,6 @@ import java.util.List;
 public class CarpalCommand implements TabExecutor {
 
     private MarketManager manager;
-    private String reloadMessage = "Reloading configuration for the Carpal Repository";
-    private String missingValue = ChatColor.RED + "Missing a valid value for the global price cut";
-    private String globalPriceCutValid = "Global Price Cut has been changed to ";
-    private String cantSell = "The item cannot be sold at this time";
-    private String cantBuy = "The item cannot be bought at this time";
-    private String invalidPlayer = "The chosen player is not online";
-    private String invalidMaterial = "The material is not a valid item";
 
     public CarpalCommand(MarketManager manager)
     {
@@ -128,7 +120,10 @@ public class CarpalCommand implements TabExecutor {
             sender.sendMessage(Messages.saleInvalidValue);
             return true;
         }
-        manager.updateSalePrice(material, value);
+
+        Material material2 = manager.getMappedMaterial(material);
+
+        manager.updateSalePrice(material2, value);
         String message = Messages.salePriceChange.replace("Material", material.name()).replace("Value", String.valueOf(value));
         if(sender instanceof Player)
             sender.sendMessage(message);
@@ -181,6 +176,9 @@ public class CarpalCommand implements TabExecutor {
             sender.sendMessage(Messages.notEnoughMoney);
             return true;
         }
+
+        material = manager.getMappedMaterial(material);
+
         manager.buy(material, amount);
         manager.withdraw(player, itemValue);
         player.getInventory().addItem(new ItemStack(material, amount));
@@ -224,8 +222,10 @@ public class CarpalCommand implements TabExecutor {
             return true;
         }
 
-        float itemValue = (float)amount * manager.getSellPrice(material);
-        manager.sell(material, amount);
+        Material material2 = manager.getMappedMaterial(material);
+
+        float itemValue = (float)amount * manager.getSellPrice(material2);
+        manager.sell(material2, amount);
         manager.deposit(player, itemValue);
         String message = Messages.successfulSell.replace("Amount", String.valueOf(amount)).replace("Material", material.name()).replace("Value", String.valueOf(itemValue));
         if(sender instanceof Player)
@@ -249,8 +249,10 @@ public class CarpalCommand implements TabExecutor {
             return true;
         }
 
-        float buyPrice = manager.getBuyPrice(material);
-        float sellPrice = manager.getSellPrice(material);
+        Material material2 = manager.getMappedMaterial(material);
+
+        float buyPrice = manager.getBuyPrice(material2);
+        float sellPrice = manager.getSellPrice(material2);
         String message = Messages.priceBuySell.replace("Material", material.name()).replace("cost", String.valueOf(buyPrice)).replace("value", String.valueOf(sellPrice));
         sender.sendMessage(message);
         return true;
@@ -271,7 +273,9 @@ public class CarpalCommand implements TabExecutor {
             return true;
         }
 
-        String message = Messages.stockCheck.replace("Material", material.name()).replace("Amount", String.valueOf(manager.getCurrentStock(material)));
+        Material material2 = manager.getMappedMaterial(material);
+
+        String message = Messages.stockCheck.replace("Material", material.name()).replace("Amount", String.valueOf(manager.getCurrentStock(material2)));
         sender.sendMessage(message);
         return true;
     }

@@ -77,7 +77,20 @@ public class MarketManager {
      */
     public List<String> getMarketMaterials()
     {
-        return market.getMarketMaterials();
+        Set<String> names = new HashSet<>();
+        names.addAll(market.getMarketMaterials());
+        names.addAll(getMappedItems());
+        return new LinkedList<>(names);
+    }
+
+    public Set<String> getMappedItems()
+    {
+        Set<String> items = new HashSet<>();
+        for(Material material : oreMap.keySet())
+        {
+            items.add(material.name());
+        }
+        return items;
     }
 
     /**
@@ -90,6 +103,18 @@ public class MarketManager {
     }
 
     /**
+     * Gets the mapped material if it exists
+     * @param material
+     * @return
+     */
+    public Material getMappedMaterial(Material material)
+    {
+        if(oreMap.containsKey(material))
+            return oreMap.get(material);
+        return material;
+    }
+
+    /**
      * Sell a specific item to the repository
      * @param material
      * @param amount
@@ -97,8 +122,6 @@ public class MarketManager {
      */
     public float sell(Material material, int amount)
     {
-        if(oreMap.containsKey(material))
-            material = oreMap.get(material);
         if(market.addAmount(amount, material))
             return logic.getCurrentSellPrice(market.getMarketItem(material), getRepositoryItem(material), globalPriceCut);
 

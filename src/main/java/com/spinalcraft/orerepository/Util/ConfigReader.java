@@ -39,7 +39,7 @@ public class ConfigReader {
             Material material = Material.matchMaterial(name);
             if(material == null)
             {
-                plugin.getServer().getConsoleSender().sendMessage(ChatColor.RED + "Item " + name + " in the market config is not a valid material");
+                plugin.getServer().getConsoleSender().sendMessage(ChatColor.DARK_RED + "Item " + name + " in the market config is not a valid material");
                 continue;
             }
             MarketItem item = new MarketItem();
