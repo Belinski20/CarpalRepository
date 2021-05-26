@@ -97,6 +97,8 @@ public class MarketManager {
      */
     public float sell(Material material, int amount)
     {
+        if(oreMap.containsKey(material))
+            material = oreMap.get(material);
         if(market.addAmount(amount, material))
             return logic.getCurrentSellPrice(market.getMarketItem(material), getRepositoryItem(material), globalPriceCut);
 
