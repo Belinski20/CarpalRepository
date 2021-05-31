@@ -52,11 +52,21 @@ public class MarketManager {
     }
 
     /**
+     * Returns the plugin
+     * @return
+     */
+    public Plugin getPlugin()
+    {
+        return plugin;
+    }
+
+    /**
      * Returns if the reload was successful or not
      * @return
      */
     public boolean reload()
     {
+        save();
         market.removeMarket();
         repoItems.clear();
         oreMap.clear();

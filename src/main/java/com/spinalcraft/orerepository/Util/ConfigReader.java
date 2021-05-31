@@ -179,4 +179,30 @@ public class ConfigReader {
         config.save(file);
     }
 
+    public static boolean generateItemTemplate(Material material, Plugin plugin) throws IOException {
+        FileConfiguration config;
+        File file = new File(plugin.getDataFolder(), "market.yml");
+        config = YamlConfiguration.loadConfiguration(file);
+
+        if(config.get(material.name()) == null)
+        {
+            config.set(material.name(), 0);
+            config.save(file);
+        }
+        else return false;
+
+        file = new File(plugin.getDataFolder(), "repository.yml");
+        config = YamlConfiguration.loadConfiguration(file);
+
+        config.set(material.name() + ".default_price", 0);
+        config.set(material.name() + ".default_amount", 0);
+        config.set(material.name() + ".min_price", 0);
+        config.set(material.name() + ".max_price", 0);
+        config.set(material.name() + ".step_amount", 0);
+        config.set(material.name() + ".step_price", 0);
+        config.set(material.name() + ".sale_modifier", 0);
+        config.save(file);
+        return true;
+    }
+
 }

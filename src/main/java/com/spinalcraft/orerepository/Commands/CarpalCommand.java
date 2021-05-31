@@ -1,6 +1,7 @@
 package com.spinalcraft.orerepository.Commands;
 
 import com.spinalcraft.orerepository.MarketManager;
+import com.spinalcraft.orerepository.Util.ConfigReader;
 import com.spinalcraft.orerepository.Util.Messages;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,13 +53,21 @@ public class CarpalCommand implements TabExecutor {
         if(args[0].equals("stock"))
             if(sender.hasPermission("Cr.stock"))
                 return stock(sender, args);
+        if(args[0].equals("additem"))
+            if(sender.hasPermission("Cr.add.admin")) {
+                try {
+                    return addItem(sender, args);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         return false;
     }
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if(args.length == 1)
-            return Arrays.asList("reload", "globalcut", "sale", "buy", "sell", "stock", "price");
+            return Arrays.asList("reload", "globalcut", "sale", "buy", "sell", "stock", "price", "additem");
         if(args.length == 2 && (args[0].equals("sale") || args[0].equals("stock") || args[0].equals("price")))
             return manager.getMarketMaterials();
         if(args.length == 3 && (args[0].equals("sell") || args[0].equals("buy")))
@@ -83,7 +93,7 @@ public class CarpalCommand implements TabExecutor {
         }
         try
         {
-            value = Integer.parseInt(args[2]);
+            value = Integer.parseInt(args[1]);
         }
         catch(NumberFormatException e)
         {
@@ -184,7 +194,13 @@ public class CarpalCommand implements TabExecutor {
         player.getInventory().addItem(new ItemStack(material, amount));
         String message = Messages.successfulPurchase.replace("Amount", String.valueOf(amount)).replace("Material", material.name()).replace("Value", String.valueOf(itemValue));
         if(sender instanceof Player)
-            sender.sendMessage(message);
+            if(sender.equals(player))
+                sender.sendMessage(message);
+            else
+            {
+                sender.sendMessage(message.replace("You bought", "You forced " + player.getName() + " to buy "));
+                player.sendMessage(message);
+            }
         sender.getServer().getConsoleSender().sendMessage(message.replace("You", player.getName()));
         return true;
     }
@@ -229,7 +245,13 @@ public class CarpalCommand implements TabExecutor {
         manager.deposit(player, itemValue);
         String message = Messages.successfulSell.replace("Amount", String.valueOf(amount)).replace("Material", material.name()).replace("Value", String.valueOf(itemValue));
         if(sender instanceof Player)
-            sender.sendMessage(message);
+            if(sender.equals(player))
+                sender.sendMessage(message);
+            else
+            {
+                sender.sendMessage(message.replace("You sold", "You forced " + player.getName() + " to sell "));
+                player.sendMessage(message);
+            }
         sender.getServer().getConsoleSender().sendMessage(message.replace("You", player.getName()));
         return true;
     }
@@ -277,6 +299,33 @@ public class CarpalCommand implements TabExecutor {
 
         String message = Messages.stockCheck.replace("Material", material.name()).replace("Amount", String.valueOf(manager.getCurrentStock(material2)));
         sender.sendMessage(message);
+        return true;
+    }
+
+    private boolean addItem(CommandSender sender, String[] args) throws IOException {
+        if(args.length < 2)
+        {
+            sender.sendMessage(Messages.addItemInvalidParameters);
+            return true;
+        }
+
+        Material material = Material.matchMaterial(args[1]);
+        if(material == null)
+        {
+            sender.sendMessage(Messages.invalidMaterial);
+            return true;
+        }
+
+        if(ConfigReader.generateItemTemplate(material, manager.getPlugin()))
+        {
+            if(sender instanceof Player)
+                sender.sendMessage(Messages.successfulItemAdd.replace("Material", material.name()));
+            sender.getServer().getConsoleSender().sendMessage(Messages.successfulItemAdd.replace("Material", material.name()));
+        }
+        else
+        {
+            sender.sendMessage(Messages.itemAlreadyExists.replace("Material", material.name()));
+        }
         return true;
     }
 }
