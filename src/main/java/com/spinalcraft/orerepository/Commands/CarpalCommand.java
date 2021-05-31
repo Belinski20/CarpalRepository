@@ -193,15 +193,22 @@ public class CarpalCommand implements TabExecutor {
         manager.withdraw(player, itemValue);
         player.getInventory().addItem(new ItemStack(material, amount));
         String message = Messages.successfulPurchase.replace("Amount", String.valueOf(amount)).replace("Material", material.name()).replace("Value", String.valueOf(itemValue));
-        if(sender instanceof Player)
-            if(sender.equals(player))
-                sender.sendMessage(message);
-            else
-            {
-                sender.sendMessage(message.replace("You bought", "You forced " + player.getName() + " to buy "));
-                player.sendMessage(message);
-            }
-        sender.getServer().getConsoleSender().sendMessage(message.replace("You", player.getName()));
+        if(sender.equals(player))
+        {
+            sender.getServer().getConsoleSender().sendMessage(message.replace("You", player.getName()));
+            sender.sendMessage(message);
+        }
+        else if(sender instanceof Player)
+        {
+            sender.sendMessage(message.replace("You bought", "You forced " + player.getName() + " to buy "));
+            player.sendMessage(message);
+            sender.getServer().getConsoleSender().sendMessage(message.replace("You", player.getName()));
+        }
+        else
+        {
+            player.sendMessage(message);
+            sender.sendMessage(message.replace("You bought", "You forced " + player.getName() + " to buy "));
+        }
         return true;
     }
 
@@ -244,15 +251,22 @@ public class CarpalCommand implements TabExecutor {
         manager.sell(material2, amount);
         manager.deposit(player, itemValue);
         String message = Messages.successfulSell.replace("Amount", String.valueOf(amount)).replace("Material", material.name()).replace("Value", String.valueOf(itemValue));
-        if(sender instanceof Player)
-            if(sender.equals(player))
-                sender.sendMessage(message);
-            else
-            {
-                sender.sendMessage(message.replace("You sold", "You forced " + player.getName() + " to sell "));
-                player.sendMessage(message);
-            }
-        sender.getServer().getConsoleSender().sendMessage(message.replace("You", player.getName()));
+         if(sender.equals(player))
+         {
+             sender.getServer().getConsoleSender().sendMessage(message.replace("You", player.getName()));
+             sender.sendMessage(message);
+         }
+         else if(sender instanceof Player)
+         {
+             sender.sendMessage(message.replace("You sold", "You forced " + player.getName() + " to sell "));
+             player.sendMessage(message);
+             sender.getServer().getConsoleSender().sendMessage(message.replace("You", player.getName()));
+         }
+         else
+         {
+             player.sendMessage(message);
+             sender.sendMessage(message.replace("You sold", "You forced " + player.getName() + " to sell "));
+         }
         return true;
     }
 
