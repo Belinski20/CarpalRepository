@@ -4,6 +4,7 @@ import com.spinalcraft.orerepository.MarketManager;
 import com.spinalcraft.orerepository.Util.ConfigReader;
 import com.spinalcraft.orerepository.Util.Messages;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -85,7 +86,7 @@ public class CarpalCommand implements TabExecutor {
 
     private boolean globalCut(CommandSender sender, String[] args)
     {
-        int value = 0;
+        int value;
         if(args.length < 2)
         {
             sender.sendMessage(Messages.globalCutInvalidParameters);
@@ -132,6 +133,12 @@ public class CarpalCommand implements TabExecutor {
         }
 
         Material material2 = manager.getMappedMaterial(material);
+
+        if(!manager.contains(material2))
+        {
+            sender.sendMessage(Messages.mayNeedReload);
+            return true;
+        }
 
         manager.updateSalePrice(material2, value);
         String message = Messages.salePriceChange.replace("Material", material.name()).replace("Value", String.valueOf(value));
@@ -188,6 +195,12 @@ public class CarpalCommand implements TabExecutor {
         }
 
         material = manager.getMappedMaterial(material);
+
+        if(!manager.contains(material))
+        {
+            sender.sendMessage(Messages.mayNeedReload);
+            return true;
+        }
 
         manager.buy(material, amount);
         manager.withdraw(player, itemValue);
@@ -247,6 +260,12 @@ public class CarpalCommand implements TabExecutor {
 
         Material material2 = manager.getMappedMaterial(material);
 
+        if(!manager.contains(material2))
+        {
+            sender.sendMessage(Messages.mayNeedReload);
+            return true;
+        }
+
         float itemValue = (float)amount * manager.getSellPrice(material2);
         manager.sell(material2, amount);
         manager.deposit(player, itemValue);
@@ -287,6 +306,12 @@ public class CarpalCommand implements TabExecutor {
 
         Material material2 = manager.getMappedMaterial(material);
 
+        if(!manager.contains(material2))
+        {
+            sender.sendMessage(Messages.mayNeedReload);
+            return true;
+        }
+
         float buyPrice = manager.getBuyPrice(material2);
         float sellPrice = manager.getSellPrice(material2);
         String message = Messages.priceBuySell.replace("Material", material.name()).replace("cost", String.valueOf(buyPrice)).replace("value", String.valueOf(sellPrice));
@@ -294,6 +319,13 @@ public class CarpalCommand implements TabExecutor {
         return true;
     }
 
+    /**
+     * Gets the current number of items in the market
+     * Also gives the buy and sell price
+     * @param sender
+     * @param args
+     * @return
+     */
     private boolean stock(CommandSender sender, String[] args)
     {
         if(args.length < 2)
@@ -311,11 +343,34 @@ public class CarpalCommand implements TabExecutor {
 
         Material material2 = manager.getMappedMaterial(material);
 
-        String message = Messages.stockCheck.replace("Material", material.name()).replace("Amount", String.valueOf(manager.getCurrentStock(material2)));
-        sender.sendMessage(message);
+        if(!manager.contains(material2))
+        {
+            sender.sendMessage(Messages.mayNeedReload);
+            return true;
+        }
+
+
+        String stock = Messages.stockCheck;
+        stock = stock.replace("Material", material.name());
+        stock = stock.replace("Amount", String.valueOf(manager.getCurrentStock(material2)));
+        stock = ChatColor.translateAlternateColorCodes('&', stock);
+        String value = Messages.stockInformation;
+        value = value.replace("Sell", String.valueOf(manager.getSellPrice(material2)));
+        value = value.replace("Purchase", String.valueOf(manager.getBuyPrice(material2)));
+        value = ChatColor.translateAlternateColorCodes('&', value);
+        sender.sendMessage(stock);
+        sender.sendMessage(value);
         return true;
     }
 
+    /**
+     * Adds an item to the repository and the market with default values
+     * Only creates an item if it does not exist in the market already
+     * @param sender
+     * @param args
+     * @return
+     * @throws IOException
+     */
     private boolean addItem(CommandSender sender, String[] args) throws IOException {
         if(args.length < 2)
         {

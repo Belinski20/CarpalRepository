@@ -35,8 +35,6 @@ public class MarketItem {
 
     @Override
     public boolean equals(Object o) {
-        if(this.material == o)
-            return true;
-        return false;
+        return this.material == o;
     }
 }

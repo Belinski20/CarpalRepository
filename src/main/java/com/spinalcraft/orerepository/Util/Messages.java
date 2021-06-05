@@ -22,8 +22,10 @@ public class Messages {
     public static String priceInvalidParameters = "Usage - /cr price <item material>";
     public static String priceBuySell = "Material: Buy[cost] Sell[value]";
     public static String stockInvalidParameters = "Usage - /cr stock <item material>";
-    public static String stockCheck = "Material: Amount";
+    public static String stockCheck = "&6Carpal Repository &ecurrently has &dAmount &bMaterial&e.";
+    public static String stockInformation = "&eYou can sell for &2$&cSell &eand purchase for &2$&aPurchase&e.";
     public static String addItemInvalidParameters = "Usage - /cr addItem <item material>";
     public static String successfulItemAdd = "Material has been successfully added to the Carpal Repository";
     public static String itemAlreadyExists = "Material already exists in the Carpal Repository";
+    public static String mayNeedReload = "Material does not exist in the current market, a reload may be needed";
 }

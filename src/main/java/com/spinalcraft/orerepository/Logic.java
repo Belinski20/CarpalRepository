@@ -10,6 +10,10 @@ public class Logic {
      */
     public float getCurrentBuyPrice(MarketItem mItem, RepositoryItem rItem)
     {
+        // If item is new then max price is 0
+        // Also if max price is 0 then the most an item should be is 0
+        if(rItem.getMaxPrice() == 0)
+            return 0;
         // Default cost of the item
         int defaultCost = rItem.getDefaultPrice();
 

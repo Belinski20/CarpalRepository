@@ -239,4 +239,18 @@ public class MarketManager {
     {
         econ.depositPlayer(player, cost);
     }
+
+    /**
+     * Returns if the current market contains a specific material
+     * @return
+     */
+    public boolean contains(Material material)
+    {
+        for(RepositoryItem item: repoItems)
+        {
+            if(item.getMaterial().equals(material))
+                return true;
+        }
+        return false;
+    }
 }
